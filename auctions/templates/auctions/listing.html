@@ -1,0 +1,94 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Listing: {{ item.title }}
+        {% if watched %}
+            <small><span class='badge badge-secondary'>watchlist</span></small>
+        {% endif %}
+    </h2>
+    
+    {% if not watched %}
+        <form action="{% url 'watch' item.id %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="watch" value="yes">
+            <input class="btn btn-primary" type="submit" value="Add to Watchlist">
+        </form>
+    {% endif %}
+
+    {% if item.image %}
+        <img src="{{ item.image.url }}" style="max-height:400px; margin-top: 10px;">
+    {% endif %}
+    
+    <div class="text-body" style="margin-top: 5px;">{{ item.description }}</div>
+
+    {% if item.isActive %}
+        <h3 style="margin-top: 5px;">&yen;{{ item.currentPrice }}</h3>
+        
+        <div class="text-body">
+            {% if bidCount %}
+                {{ bidCount }} bid(s) so far.
+            {% else %}
+                No bid yet. This is the starting bid.
+            {% endif %}
+        </div>
+        {% if user == item.listedBy %}
+            <form action="{% url 'close' item.id %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="close" value="yes">
+                <input class="btn btn-danger" type="submit" value="Close">
+            </form>
+        {% else %}
+            <form action="{% url 'bid' item.id %}" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input class="form-control" type="text" name="bid" placeholder="bid">
+                </div>
+                <input class="btn btn-primary" type="submit" value="Place bid">
+            </form>
+        {% endif %}
+    {% else %}
+        {% if user == item.winner %}
+            {% if user == item.listedBy %}
+                <h3 style="margin-top: 5px;">You closed the Bidding!</h3>
+            {% else %}
+                <h3 style="margin-top: 5px;">You are the Winner!</h3>
+            {% endif %}
+        {% else %}
+            <h3 style="margin-top: 5px;">Winner: {{ item.winner }}</h3>
+        {% endif %}
+    
+    {% endif %}
+
+    {% if watched %}
+        <form action="{% url 'watch' item.id %}" method="POST" style="margin-top: 5px;">
+            {% csrf_token %}
+            <input type="hidden" name="watch" value="no">
+            <input class="btn btn-primary" type="submit" value="Remove from Watchlist">
+        </form>
+    {% endif %}
+    
+    <h4 style="margin-top: 10px;">Details</h4>
+    <ul>
+        <li>Listed by: {{ item.listedBy.username }}</li>
+        <li>Category: {{ item.get_category_display }}</li>
+    </ul>
+
+    <h4 style="margin-top: 10px;">Comments</h4>
+    <ul>
+        {% if comments %}
+            {% for comment in comments %}
+                <li>{{ comment.commenter.username }}: {{ comment.comment }}</li>
+            {% endfor %}
+        {% else %}
+            <li>No comments yet.</li>
+        {% endif %}
+    </ul>
+    <form action="{% url 'comment' item.id %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <input class="form-control" type="text" name="comment" placeholder="Write your comment">
+        </div>
+        <input class="btn btn-primary" type="submit" value="Comment">
+    </form>
+
+{% endblock %}

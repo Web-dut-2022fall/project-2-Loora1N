@@ -1,0 +1,24 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>{% block title2 %}{% endblock %}</h2>
+
+    <div class="container-fluid">
+        {% for list in listings %}
+            <a href="{% url 'listing' list.id %}" style="color:black; text-decoration: none; cursor:default;">
+                <div class="row border" style="margin-top: 8px; height: 250px;">
+                    <div class="col-md-4" style="text-align: center">
+                        {% if list.image %}
+                            <img src="{{ list.image.url }}" style="max-height:250px">
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <h3 style="padding-top: 10px;">{{ list.title }}</h3>
+                        <h5><strong>Price: </strong>&yen;{{ list.currentPrice }}</h5>
+                        <h5>{{ list.description }}</h5>
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+{% endblock %}
